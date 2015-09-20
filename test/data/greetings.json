@@ -1,0 +1,3 @@
+{ "_id" : { "$oid" : "55feeeb5dec2a682ef28f559" }, "name" : "ciao", "lang" : "it" }
+{ "_id" : { "$oid" : "55feeeb9dec2a682ef28f55a" }, "lang" : "en", "name" : "hello" }
+{ "_id" : { "$oid" : "55feeee1dec2a682ef28f55b" }, "name" : "hi", "lang" : "en" }
