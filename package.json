@@ -1,5 +1,5 @@
 {
-  "name": "@bitliner/mongo-io",
+  "name": "mongo-io",
   "version": "1.0.2",
   "description": "",
   "main": "mongo-io.js",
