@@ -13,7 +13,9 @@
     "mongodb": "^2.0.43"
   },
   "dependencies": {
+    "byline": "^4.2.1",
     "logb": "0.0.2",
-    "mongodb": "^2.0.43"
+    "mongodb": "^2.0.43",
+    "mongodb-extended-json": "^1.5.1"
   }
 }
