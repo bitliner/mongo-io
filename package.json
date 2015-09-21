@@ -13,6 +13,7 @@
     "mongodb": "^2.0.43"
   },
   "dependencies": {
-    "logb": "0.0.2"
+    "logb": "0.0.2",
+    "mongodb": "^2.0.43"
   }
 }
