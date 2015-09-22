@@ -4,54 +4,60 @@
 
 // or more concisely
 // var sys = require('sys');
-var exec = require('child_process').exec,
-	Logger = require('logb').getLogger(module.filename),
+var Logger = require('logb').getLogger(module.filename),
 	MongoClient = require('mongodb').MongoClient;
 
-function getCb(cb) {
-	return function(error, stdout, stderr) {
-
-
-		if (stdout && stdout !== '') {
-			Logger.info('MongoIO >>>: ' + stdout);
-		}
-		if (stderr && stderr !== '') {
-			Logger.info('MongoIO >>>: ' + stderr);
-		}
-		if (error !== null) {
-			// console.log('exec error: ' + error);
-			return cb(error);
-		}
-		cb(null, null);
-
-	};
-	// if (error) {
-	// 	console.log('Error', err);
-	// }
-	// sys.puts(stdout);
-	// sys.puts(stderr);
-
-}
+var byline = require('byline'),
+	through2 = require('through2'),
+	EJSON = require('mongodb-extended-json'),
+	fs = require('fs');
 
 
 
 module.exports.mongoimport = function(opts, cb) {
-	var host, port, dbName, collection, dataPath;
+	var host, port, dbName, collectionName, path;
 
 	host = opts.host;
 	port = opts.port;
 	dbName = opts.db;
-	collection = opts.collection;
-	dataPath = opts.path;
+	collectionName = opts.collection;
+	path = opts.path;
+
+	Logger.debug('Connecting to database...');
 
 
-	var cmd;
 
-	cmd = ['mongoimport', '--host', host, '--port', port, '-d', dbName, '-c', collection, '<', dataPath].join(' ');
+	var url = 'mongodb://' + host + ':' + port + '/' + dbName;
+	MongoClient.connect(url, function(err, db) {
+		var collection = db.collection(collectionName);
 
-	Logger.info('Running following cmd:', cmd);
 
-	exec(cmd, getCb(cb));
+		byline(fs.createReadStream(path, {
+				encoding: 'utf8'
+			}))
+			.pipe(through2.obj(function(line, encoding, done) {
+
+				this.push(EJSON.parse(line));
+				done();
+			}))
+			.pipe(through2.obj(function(mongoObject, encoding, done) {
+				var self = this;
+
+				collection.insert(mongoObject, function(err, result) {
+					if (err) {
+						return self.emit('error', err);
+					}
+					Logger.debug('Inserted document into', '"' + collection.s.name + '"');
+					self.push(result);
+					done();
+				});
+			}))
+			.on('data', function() {})
+			.on('end', function() {
+				db.close();
+				cb();
+			});
+	});
 
 };
 module.exports.emptyCollection = function(opts, cb) {
