@@ -32,7 +32,7 @@ describe('mongo.io', function() {
 
 			MongoClient.connect(url, function(err, db) {
 				var collection = db.collection(collectionName);
-				collection.remove({}, function(err) {
+				collection.drop(function(err) {
 					if (err) {
 						return console.log('Error', err);
 					}
